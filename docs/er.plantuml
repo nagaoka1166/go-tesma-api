@@ -1,0 +1,117 @@
+@startuml
+
+!define ENTITY_OMIT_FIELDS
+!define ENTITY_ATTRIBUTES_ARE_PRIVATE
+!define ENTITY_MEMBERS_ARE_PRIVATE
+
+entity users as "users\nユーザー" {
+  + id [PK]
+  email: string
+  encrypted_password: string
+  reset_password_token: string
+  reset_password_sent_at: datetime
+  remember_created_at: datetime
+  created_at: datetime
+  updated_at: datetime
+  name: string
+  faculty: integer
+  content_type: integer
+}
+
+entity researchers as "researchers\n研究者" {
+  + id [PK]
+  --
+  # user_id [FK(users, id)] - ユーザーID
+  created_at: datetime
+  updated_at: datetime
+}
+
+entity students as "students\n学生" {
+  + id [PK]
+  --
+  # user_id [FK(users, id)] - ユーザーID
+  age: integer
+  sex: integer
+  grade: integer
+  created_at: datetime
+  updated_at: datetime
+  birthday: date
+}
+
+entity likes as "likes\nいいね" {
+  + id [PK]
+  created_at: datetime
+  updated_at: datetime
+  --
+  user_id [FK(users, id)]
+  post_id [FK(posts, id)]
+}
+
+entity posts as "posts\n投稿" {
+  + id [PK]
+  title: string
+  description: text
+  caution: string
+  restriction: string
+  project: integer
+  rabo: string
+  testing_field: string
+  experment_period: string
+  meet_time: string
+  reward: string
+  item: string
+  count: integer
+  is_active: boolean
+  recruitment_period: date
+  created_at: datetime
+  updated_at: datetime
+  --
+  user_id [FK(users, id)]
+}
+
+
+entity messeage_rooms as "messeage_rooms\nメッセージルーム" {
+  + id [PK]
+  --
+  # student_id [FK(student_id, id)] - 学生ID
+  # researcher_id [FK(researcher_id, id)] - 研究者ID
+  title:string - 名前
+  created_at:datetime - 作成日
+  updated_at:datetime - 更新日
+}
+
+
+entity messages as "messages\nメッセージ" {
+  + id [PK]
+  --
+  # room_id [FK(room_id, id)] - ルームID
+  content:string - 本文
+  sender: integer - 送信者
+  created_at:datetime - 作成日
+  updated_at:datetime - 更新日
+}
+
+entity appointments as "appointments\n被験者申し込み" {
+  + id [PK]
+  --
+  # student_id [FK(student_id, id)] - 学生ID
+  # researcher_id [FK(researcher_id, id)] -研究者ID
+  status:integer - enum("申込中", "受け入れ", "拒否")
+  requested_at:datetime - 申し込み日時
+  responded_at:datetime - 返答日時
+  created_at:datetime - 作成日
+  updated_at:datetime - 更新日
+}
+
+
+users }o--o{ students
+users }o--o{ researchers
+researchers ||--o{ messeage_rooms
+messeage_rooms ||--o{ messages
+students ||--o{ messages
+researchers ||--o{ messages
+posts ||--o{ likes
+students ||--o{ appointments
+researchers ||--o{ appointments
+researchers ||--o{ posts
+
