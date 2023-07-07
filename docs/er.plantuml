@@ -13,7 +13,12 @@ entity users as "users\nユーザー" {
   remember_created_at: datetime
   created_at: datetime
   updated_at: datetime
-  name: string
+  birth_date:datetime - 生年月日
+  first_name:string - 名
+  last_name:string - 姓
+  first_name_kana:string - カナ名
+  last_name_kana:string - カナ姓
+  birth_date:datetime - 生年月日
   faculty: integer
   content_type: integer
 }
@@ -94,6 +99,7 @@ entity messages as "messages\nメッセージ" {
 entity appointments as "appointments\n被験者申し込み" {
   + id [PK]
   --
+  # post_id [FK(post_id, id)] - 学生ID
   # student_id [FK(student_id, id)] - 学生ID
   # researcher_id [FK(researcher_id, id)] -研究者ID
   status:integer - enum("申込中", "受け入れ", "拒否")
@@ -102,7 +108,6 @@ entity appointments as "appointments\n被験者申し込み" {
   created_at:datetime - 作成日
   updated_at:datetime - 更新日
 }
-
 
 users }o--o{ students
 users }o--o{ researchers
@@ -114,4 +119,3 @@ posts ||--o{ likes
 students ||--o{ appointments
 researchers ||--o{ appointments
 researchers ||--o{ posts
-
