@@ -6,11 +6,11 @@
 
 entity users as "users\nユーザー" {
   + id [PK]
+  --
+  # faculty_id [FK(users, id)] - 所属学部・院ID
   email: string
-  encrypted_password: string
-  reset_password_token: string
-  reset_password_sent_at: datetime
-  remember_created_at: datetime
+
+  uid:string - firebaseユーザー識別子
   created_at: datetime
   updated_at: datetime
   birth_date:datetime - 生年月日
@@ -19,8 +19,16 @@ entity users as "users\nユーザー" {
   first_name_kana:string - カナ名
   last_name_kana:string - カナ姓
   birth_date:datetime - 生年月日
-  faculty: integer
   content_type: integer
+}
+
+entity faculties as "researchers\n所属学部・院テーブル" {
+  + id [PK]
+  --
+  name:string - 名前
+  order:integer - 順序
+  created_at: datetime
+  updated_at: datetime
 }
 
 entity researchers as "researchers\n研究者" {
@@ -35,12 +43,11 @@ entity students as "students\n学生" {
   + id [PK]
   --
   # user_id [FK(users, id)] - ユーザーID
-  age: integer
-  sex: integer
-  grade: integer
+  age: integer - 年齢
+  sex: integer  - 性別
+  grade: integer - 学年
   created_at: datetime
   updated_at: datetime
-  birthday: date
 }
 
 entity likes as "likes\nいいね" {
@@ -52,8 +59,11 @@ entity likes as "likes\nいいね" {
   post_id [FK(posts, id)]
 }
 
-entity posts as "posts\n投稿" {
+entity recruit as "posts\n投稿" {
   + id [PK]
+  --
+  # researcher_id [FK(researcher_id, id)] - 研究者ID
+  # message_room_id [FK(messeage_rooms, id)] - メッセージルームID
   title: string
   description: text
   caution: string
@@ -74,6 +84,15 @@ entity posts as "posts\n投稿" {
   user_id [FK(users, id)]
 }
 
+entity recruit_student as "被験者応募者テーブル"  {
+  + id [PK]
+  --
+  # recruit_id [FK(post_id, id)] - 投稿ID
+  # student_id [FK(student_id, id)] - 学生ID
+  created_at: datetime
+  updated_at: datetime
+}
+
 
 entity messeage_rooms as "messeage_rooms\nメッセージルーム" {
   + id [PK]
@@ -89,7 +108,7 @@ entity messeage_rooms as "messeage_rooms\nメッセージルーム" {
 entity messages as "messages\nメッセージ" {
   + id [PK]
   --
-  # room_id [FK(room_id, id)] - ルームID
+  # message_room_id [FK(room_id, id)] - ルームID
   content:string - 本文
   sender: integer - 送信者
   created_at:datetime - 作成日
@@ -103,18 +122,17 @@ entity appointments as "appointments\n被験者申し込み" {
   # student_id [FK(student_id, id)] - 学生ID
   # researcher_id [FK(researcher_id, id)] -研究者ID
   status:integer - enum("申込中", "受け入れ", "拒否")
-  requested_at:datetime - 申し込み日時
   responded_at:datetime - 返答日時
   created_at:datetime - 作成日
   updated_at:datetime - 更新日
 }
 
+users }o--|| faculties
 users }o--o{ students
 users }o--o{ researchers
+students ||--o{ messeage_rooms
 researchers ||--o{ messeage_rooms
 messeage_rooms ||--o{ messages
-students ||--o{ messages
-researchers ||--o{ messages
 posts ||--o{ likes
 students ||--o{ appointments
 researchers ||--o{ appointments
