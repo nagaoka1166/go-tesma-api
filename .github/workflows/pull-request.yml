@@ -25,6 +25,9 @@ jobs:
         with:
           go-version: '1.20'
 
+      - name: Install goimports
+        run: go get golang.org/x/tools/cmd/goimports
+
       - name: Lint
         run: |
           goimports -w .
