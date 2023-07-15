@@ -32,6 +32,7 @@ jobs:
         run: |
           $(go env GOPATH)/bin/goimports -w .
           gofmt -s -w .
+        working-directory: app
 
       - name: Cache Go modules
         uses: actions/cache@v3
@@ -49,11 +50,10 @@ jobs:
             sleep 5
           done
 
-      - name: Change to app directory
-        run: cd app
-
       - name: Build
         run: go build -v .
+        working-directory: app
 
       - name: Test
         run: go test -v .
+        working-directory: app
