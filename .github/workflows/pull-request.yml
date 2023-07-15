@@ -50,7 +50,7 @@ jobs:
           done
 
       - name: Build
-        run: go build -v ./...
+        run: go build -v ./app
 
       - name: Test
         run: go test -v ./...
