@@ -50,6 +50,14 @@ jobs:
             sleep 5
           done
 
+      - name: Tidy dependencies
+        run: go mod tidy
+        working-directory: app
+
+      - name: Download dependencies
+        run: go mod download
+        working-directory: app
+
       - name: Build
         run: go build -v .
         working-directory: app
