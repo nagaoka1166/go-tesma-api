@@ -23,7 +23,7 @@ func TestCreateUser(t *testing.T) {
         Password: "password",
     }
 
-    mockUserRepo.EXPECT().CreateUser(context.Background(), user).Return(nil)
+    mockUserRepo.EXPECT().GetUserByEmail(context.Background(), user.Email).Return(user, nil)
 
     usecase := usecase.NewUserUsecase(mockUserRepo)
 
