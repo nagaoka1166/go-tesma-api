@@ -8,7 +8,7 @@ import (
     "github.com/golang/mock/gomock"
     
     "app/domain/entity"
-    "app/domain/entity/repository"
+    "app/domain/repository"
     "app/domain/usecase" 
 )
 
