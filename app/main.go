@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"app/domain/usecase"
-	"app/router"
-	"app/infrastructure"
+	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
+	"github.com/nagaoka166/go-tesma-api/app/infrastructure"
+	"github.com/nagaoka166/go-tesma-api/app/router"
 
 	"github.com/gin-gonic/gin"
 )
