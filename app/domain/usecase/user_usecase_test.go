@@ -7,9 +7,9 @@ import (
     
     "github.com/golang/mock/gomock"
     
-    "app/domain/entity"
-    "app/domain/repository"
-    "app/domain/usecase" 
+    "github.com/nagaoka166/go-tesma-api/app/domain/entity"
+    "github.com/nagaoka166/go-tesma-api/app/domain/repository"
+    "github.com/nagaoka166/go-tesma-api/app/domain/usecase" 
 )
 
 func TestCreateUser(t *testing.T) {

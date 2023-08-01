@@ -1,14 +1,17 @@
 package usecase
 
 import (
+    "log"
     "context"
-    
-    "app/domain/entity"
-    "app/domain/repository"
+    "errors"
+
+    "github.com/nagaoka166/go-tesma-api/app/domain/entity"
+    "github.com/nagaoka166/go-tesma-api/app/domain/repository"
 )
 
 type UserUsecase interface {
     CreateUser(ctx context.Context, user *entity.User) error
+    UserExists(ctx context.Context, email string) (bool, error)
 }
 
 type userUsecase struct {
@@ -31,7 +34,7 @@ func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) error {
     // Check if the user already exists
     _, err = u.userRepo.GetUserByEmail(ctx, user.Email)
     if err == nil {
-        return errors.New("user already exists")
+        return errors.New("user already  exists")
     }
 
     // Create the user
@@ -41,4 +44,12 @@ func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) error {
     }
 
     return nil
+}
+
+func (u *userUsecase) UserExists(ctx context.Context, email string) (bool, error) {
+    exists, err := u.userRepo.UserExists(ctx, email)
+    if err != nil {
+        log.Printf("error in userRepo.UserExists: %v", err)
+    }
+    return exists, err
 }

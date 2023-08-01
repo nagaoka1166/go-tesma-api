@@ -1,14 +1,13 @@
-# ベースとなる Docker イメージ指定
+# Dockerfile
 FROM golang:1.20
 
-# コンテナ内に `app` ディレクトリを作成
 WORKDIR /app
 
-# ホストのファイルをコンテナの作業ディレクトリにコピー
-COPY . .
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Go をコンパイルしてバイナリを生成
-RUN go build -o main .
+COPY ./app ./app
 
-# バイナリを実行
-CMD ["/app/main"]
+RUN go build -o main ./app/main.go
+
+CMD ["./main"]
