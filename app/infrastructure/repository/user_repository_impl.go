@@ -4,6 +4,7 @@ package repository
 import (
 	"context"
 	"log"
+	"fmt"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
@@ -46,18 +47,14 @@ func (r *UserRepoImpl) RefreshToken(ctx context.Context, refreshToken string) (s
 }
 
 
-func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error {
-	params := (&auth.UserToCreate{}).Email(user.Email).Password(user.Password)
-	_, err := r.FirebaseAuth.CreateUser(ctx, params)
-	return err
-}
+
 
 
 func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, error) {
 	_, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
 	if err != nil {
-		// Firebaseからのエラーメッセージは err.Error() で取得できます
-		if err.Error() == "firebase: user does not exist" {
+		log.Printf("Error from Firebase Auth: %v", err)  // This is new
+		if auth.IsUserNotFound(err) {
 			return false, nil
 		}
 		return false, err
@@ -65,6 +62,22 @@ func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, erro
 	return true, nil
 }
 
+
+
+func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error {
+	exists, err := r.UserExists(ctx, user.Email)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return fmt.Errorf("User already exists")
+	}
+
+	params := (&auth.UserToCreate{}).Email(user.Email).Password(user.Password)
+	_, err = r.FirebaseAuth.CreateUser(ctx, params)
+	return err
+}
 
 
 

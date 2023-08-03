@@ -6,7 +6,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY ./app ./app
+COPY . /app
 
 RUN go build -o main ./app/main.go
 
