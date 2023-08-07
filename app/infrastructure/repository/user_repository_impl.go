@@ -96,15 +96,7 @@ func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entit
 	// ユーザーレコードを entity.User に変換
 	user := &entity.User{
 		Email: userRecord.Email,
-		// Password は取得できませんが、他の必要なフィールドをここで設定できます。
 	}
 
 	return user, nil
 }
-
-
-
-
-
-// その他の UserRepository インターフェースのメソッドを実装します
-// GetUserByEmail, UpdateUser, RefreshToken, Login...
