@@ -19,22 +19,35 @@ type UserRepoImpl struct {
 }
 
 func NewUserRepo() repository.UserRepository {
-	credentialsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON")
-    if credentialsJSON == "" {
-        log.Fatal("FIREBASE_CREDENTIALS_JSON is not set.")
-    }
-
-	app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(CredentialsJSON)))
-	
-    if err != nil {
-        log.Fatalf("error initializing app: %v\n", err)
-    }
-    auth, err := app.Auth(context.Background())
-    if err != nil {
-        log.Fatalf("error getting Auth client: %v\n", err)
-    }
-    return &UserRepoImpl{FirebaseAuth: auth}
+	if os.Getenv("IS_CI") != "" {
+		// CI環境
+		credentialsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON")
+		if credentialsJSON == "" {
+			log.Fatal("FIREBASE_CREDENTIALS_JSON is not set.")
+		}
+		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(credentialsJSON)))
+		if err != nil {
+			log.Fatalf("error initializing app: %v\n", err)
+		}
+		auth, err := app.Auth(context.Background())
+		if err != nil {
+			log.Fatalf("error getting Auth client: %v\n", err)
+		}
+		return &UserRepoImpl{FirebaseAuth: auth}
+	} else {
+		// ローカル環境
+		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(CredentialsJSON)))
+		if err != nil {
+			log.Fatalf("error initializing app: %v\n", err)
+		}
+		auth, err := app.Auth(context.Background())
+		if err != nil {
+			log.Fatalf("error getting Auth client: %v\n", err)
+		}
+		return &UserRepoImpl{FirebaseAuth: auth}
+	}
 }
+
 
 
 

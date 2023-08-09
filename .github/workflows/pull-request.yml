@@ -57,6 +57,9 @@ jobs:
       - name: Download dependencies
         run: go mod download
         working-directory: .
+      - name: Set Firebase Credentials
+        run: echo "FIREBASE_CREDENTIALS_JSON=${{ secrets.FIREBASE_CREDENTIALS_JSON }}" >> $GITHUB_ENV
+        
       - name: Build
         run: go build -v .
         working-directory: .
