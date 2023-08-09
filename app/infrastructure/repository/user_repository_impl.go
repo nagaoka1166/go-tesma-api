@@ -1,0 +1,132 @@
+// Path: app/infrastructure/repository/user_repository_impl.go
+package repository
+
+import (
+	"context"
+	"log"
+	"fmt"
+	"os"
+
+	firebase "firebase.google.com/go"
+	"firebase.google.com/go/auth"
+	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
+	"github.com/nagaoka166/go-tesma-api/app/domain/repository"
+	"google.golang.org/api/option"
+)
+
+type UserRepoImpl struct {
+	FirebaseAuth *auth.Client
+}
+
+func loadLocalCredentials() string {
+	data, err := ioutil.ReadFile("path/to/credentials.json")
+	if err != nil {
+		log.Fatalf("Failed to load local credentials: %v", err)
+	}
+	return string(data)
+}
+
+func NewUserRepo() repository.UserRepository {
+	if os.Getenv("IS_CI") != "" {
+		// CI環境
+		credentialsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON")
+		if credentialsJSON == "" {
+			log.Fatal("FIREBASE_CREDENTIALS_JSON is not set.")
+		}
+		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(credentialsJSON)))
+		if err != nil {
+			log.Fatalf("error initializing app: %v\n", err)
+		}
+		auth, err := app.Auth(context.Background())
+		if err != nil {
+			log.Fatalf("error getting Auth client: %v\n", err)
+		}
+		return &UserRepoImpl{FirebaseAuth: auth}
+	} else {
+		// ローカル環境
+		localCredentials := loadLocalCredentials()
+		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(localCredentials)))
+		if err != nil {
+			log.Fatalf("error initializing app: %v\n", err)
+		}
+		auth, err := app.Auth(context.Background())
+		if err != nil {
+			log.Fatalf("error getting Auth client: %v\n", err)
+		}
+		return &UserRepoImpl{FirebaseAuth: auth}
+	}
+}
+
+
+
+
+
+func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
+	// TODO: 実際のログインロジックを書く
+	return nil, nil
+}
+
+func (r *UserRepoImpl) UpdateUser(ctx context.Context, user *entity.User) error {
+	// TODO: 実際のユーザー更新ロジックを書く
+	return nil
+}
+
+func (r *UserRepoImpl) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
+	// TODO: 実際のトークン更新ロジックを書く
+	return "", nil
+}
+
+
+
+
+
+func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, error) {
+	_, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
+	if err != nil {
+		log.Printf("Error from Firebase Auth: %v", err)  // This is new
+		if auth.IsUserNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+
+
+func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error {
+	exists, err := r.UserExists(ctx, user.Email)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return fmt.Errorf("User already exists")
+	}
+
+	params := (&auth.UserToCreate{}).Email(user.Email).Password(user.Password)
+	_, err = r.FirebaseAuth.CreateUser(ctx, params)
+	return err
+}
+
+
+
+
+func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	userRecord, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
+	if err != nil {
+		if err.Error() == "firebase: user does not exist" {
+			// ユーザーが存在しない場合はエラーログを出力せずにnilを返す
+			return nil, nil
+		}
+		// それ以外のエラーが発生した場合は、そのままエラーを返す
+		return nil, err
+	}
+	
+	// ユーザーレコードを entity.User に変換
+	user := &entity.User{
+		Email: userRecord.Email,
+	}
+
+	return user, nil
+}

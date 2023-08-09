@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: dbname
@@ -32,7 +32,7 @@ jobs:
         run: |
           $(go env GOPATH)/bin/goimports -w .
           gofmt -s -w .
-        working-directory: app
+        working-directory: .
 
       - name: Cache Go modules
         uses: actions/cache@v3
@@ -52,16 +52,18 @@ jobs:
 
       - name: Tidy dependencies
         run: go mod tidy
-        working-directory: app
+        working-directory: .
 
       - name: Download dependencies
         run: go mod download
-        working-directory: app
-
+        working-directory: .
+      - name: Set Firebase Credentials
+        run: echo "FIREBASE_CREDENTIALS_JSON=${{ secrets.FIREBASE_CREDENTIALS_JSON }}" >> $GITHUB_ENV
+        
       - name: Build
         run: go build -v .
-        working-directory: app
+        working-directory: .
 
       - name: Test
         run: go test -v .
-        working-directory: app
+        working-directory: .

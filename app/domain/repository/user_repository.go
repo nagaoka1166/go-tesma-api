@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"app/domain/entity"
+	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
 	"context"
 )
 
@@ -11,4 +11,5 @@ type UserRepository interface {
 	UpdateUser(ctx context.Context, user *entity.User) error
 	RefreshToken(ctx context.Context, refreshToken string) (string, error)
 	Login(ctx context.Context, email, password string) (*entity.User, error)
+	UserExists(ctx context.Context, email string) (bool, error)
 }
