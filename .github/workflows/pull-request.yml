@@ -32,7 +32,7 @@ jobs:
         run: |
           $(go env GOPATH)/bin/goimports -w .
           gofmt -s -w .
-        working-directory: app
+        working-directory: .
 
       - name: Cache Go modules
         uses: actions/cache@v3
@@ -52,16 +52,15 @@ jobs:
 
       - name: Tidy dependencies
         run: go mod tidy
-        working-directory: app
+        working-directory: .
 
       - name: Download dependencies
         run: go mod download
-        working-directory: app
-
+        working-directory: .
       - name: Build
         run: go build -v .
-        working-directory: app
+        working-directory: .
 
       - name: Test
         run: go test -v .
-        working-directory: app
+        working-directory: .
