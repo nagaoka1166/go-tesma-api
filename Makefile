@@ -21,4 +21,5 @@ build_app:
 	go build -v .
 
 test:
-	go test -v .
+	go test -v ./...
+

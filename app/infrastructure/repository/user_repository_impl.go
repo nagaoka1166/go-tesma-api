@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"fmt"
+	"os"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
@@ -18,9 +19,13 @@ type UserRepoImpl struct {
 }
 
 func NewUserRepo() repository.UserRepository {
-    app, err := firebase.NewApp(context.Background(), &firebase.Config{
-        CredentialsJSON: []byte(CredentialsJSON),
-    })
+	credentialsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON")
+    if credentialsJSON == "" {
+        log.Fatal("FIREBASE_CREDENTIALS_JSON is not set.")
+    }
+
+	app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(CredentialsJSON)))
+	
     if err != nil {
         log.Fatalf("error initializing app: %v\n", err)
     }
