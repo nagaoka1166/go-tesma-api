@@ -2,6 +2,8 @@ build:
 	docker build --no-cache -t go-tesma-api .
 up:
 	docker-compose up
+down:
+	docker-compose down -v
 run:
 	./app
 tidy:

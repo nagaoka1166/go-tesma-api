@@ -18,17 +18,19 @@ type UserRepoImpl struct {
 }
 
 func NewUserRepo() repository.UserRepository {
-	opt := option.WithCredentialsFile("credentials.json") // Firebase の秘密鍵へのパス
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
-	}
-	auth, err := app.Auth(context.Background())
-	if err != nil {
-		log.Fatalf("error getting Auth client: %v\n", err)
-	}
-	return &UserRepoImpl{FirebaseAuth: auth}
+    app, err := firebase.NewApp(context.Background(), &firebase.Config{
+        CredentialsJSON: []byte(CredentialsJSON),
+    })
+    if err != nil {
+        log.Fatalf("error initializing app: %v\n", err)
+    }
+    auth, err := app.Auth(context.Background())
+    if err != nil {
+        log.Fatalf("error getting Auth client: %v\n", err)
+    }
+    return &UserRepoImpl{FirebaseAuth: auth}
 }
+
 
 
 func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
