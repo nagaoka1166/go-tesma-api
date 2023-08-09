@@ -18,6 +18,14 @@ type UserRepoImpl struct {
 	FirebaseAuth *auth.Client
 }
 
+func loadLocalCredentials() string {
+	data, err := ioutil.ReadFile("path/to/credentials.json")
+	if err != nil {
+		log.Fatalf("Failed to load local credentials: %v", err)
+	}
+	return string(data)
+}
+
 func NewUserRepo() repository.UserRepository {
 	if os.Getenv("IS_CI") != "" {
 		// CI環境
@@ -36,7 +44,8 @@ func NewUserRepo() repository.UserRepository {
 		return &UserRepoImpl{FirebaseAuth: auth}
 	} else {
 		// ローカル環境
-		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(CredentialsJSON)))
+		localCredentials := loadLocalCredentials()
+		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(localCredentials)))
 		if err != nil {
 			log.Fatalf("error initializing app: %v\n", err)
 		}
@@ -47,6 +56,7 @@ func NewUserRepo() repository.UserRepository {
 		return &UserRepoImpl{FirebaseAuth: auth}
 	}
 }
+
 
 
 
