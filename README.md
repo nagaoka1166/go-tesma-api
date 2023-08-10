@@ -8,10 +8,10 @@
 
 ### 構造
 
-#### app/domain/entity
+#### エンティティ層 app/domain/entity
 アプリケーションの中心的ビジネスルールを表現する層
 
-#### app/domain/usecase: ユースケース層
+#### ユースケース層 app/domain/usecase
 アプリケーションの具体的なビジネスロジックを担当。エンティティを操作を実装する。
 
 #### インターフェース層: app/interfaces
