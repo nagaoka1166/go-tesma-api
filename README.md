@@ -1,7 +1,8 @@
 # go-tesma-api
 
 ### データベース設計
-<img src="https://github.com/nagaoka1166/go-tesma-api/assets/69971830/df7226f5-1ce1-4677-84e9-01d706932dcd" width="500">
+<img src="https://github.com/nagaoka1166/go-tesma-api/assets/69971830/005f04cc-1029-43fc-9fd0-021890569815" width="500">
+
 
 ## アーキテクチャ
 このプロジェクトは、クリーンアーキテクチャの原則に基づいて設計されています。クリーンアーキテクチャの目的は、フレームワーク、データベース、UIなどの外部の詳細からビジネスロジックを独立させここ変更やテストを行いやすいように機能の独立性を担保しております。
