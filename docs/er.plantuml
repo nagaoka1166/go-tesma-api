@@ -9,7 +9,6 @@ entity users as "users\nユーザー" {
   --
   # faculty_id [FK(users, id)] - 所属学部・院ID
   email: string
-
   uid:string - firebaseユーザー識別子
   created_at: datetime
   updated_at: datetime
@@ -22,7 +21,7 @@ entity users as "users\nユーザー" {
   content_type: integer
 }
 
-entity faculties as "researchers\n所属学部・院テーブル" {
+entity faculties as "faculty\n所属学部・院テーブル" {
   + id [PK]
   --
   name:string - 名前
@@ -63,7 +62,8 @@ entity recruits as "recruits\n投稿" {
   + id [PK]
   --
   # researcher_id [FK(researcher_id, id)] - 研究者ID
-  # message_room_id [FK(messeage_rooms, id)] - メッセージルームID
+  # message_room_id [FK(messeage_room_id, id)] - メッセージルームID
+  # recruit_status_type_id [FK(recruit_status_type_id, id)] - 投稿状態タイプID
   title: string
   description: text
   caution: string
@@ -78,6 +78,13 @@ entity recruits as "recruits\n投稿" {
   count: integer
   is_active: boolean
   recruitment_period: date
+  created_at: datetime
+  updated_at: datetime
+}
+
+entity recruits_status_types as "recruits_status_types\n投稿状態" {
+  + id [PK]
+  --
   created_at: datetime
   updated_at: datetime
 }
@@ -136,3 +143,5 @@ recruits ||--o{ appointments
 students ||--o{ appointments
 researchers ||--o{ appointments
 researchers ||--o{ recruits
+recruits ||--o{ recruit_student
+recruits_status_types }o--o{  recruits

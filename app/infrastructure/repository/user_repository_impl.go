@@ -19,7 +19,7 @@ type UserRepoImpl struct {
 }
 
 func loadLocalCredentials() string {
-	data, err := ioutil.ReadFile("path/to/credentials.json")
+	data, err := ioutil.ReadFile("Credentials.json")
 	if err != nil {
 		log.Fatalf("Failed to load local credentials: %v", err)
 	}
