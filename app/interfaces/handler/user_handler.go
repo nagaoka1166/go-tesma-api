@@ -1,4 +1,4 @@
-// : github.com/nagaoka166/go-tesma-api/app/interfaces/handler/user_handler.go
+// :ファイル名:/app/interfaces/handler/user_handler.go
 package handler
 
 import (
@@ -6,7 +6,7 @@ import (
 	"context"
 	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
 	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
-    "strings"
+    // "strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,21 +32,15 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 
     err := h.UserUsecase.CreateUser(context.Background(), &user)
     if err != nil {
-        if err.Error() == "User already exists" {
+        switch err.Error() {
+        case "user already exists":
             c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
-            return
+        default:
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         }
-        
-        // ユーザーが存在しないエラーは無視
-        if strings.Contains(err.Error(), "cannot find user from email:") {
-            c.JSON(http.StatusCreated, gin.H{"status": "user created"})
-            return
-        }
-    
-        c.JSON(http.StatusInternalServerError, gin.H{"error3": err.Error()})
         return
     }
     
     c.JSON(http.StatusCreated, gin.H{"status": "user created"})
-    
 }
+

@@ -23,10 +23,11 @@ func TestCreateUser(t *testing.T) {
     }
 
     // GetUserByEmailのmockを設定。ユーザーが存在しないと仮定して、エラーを返す。
-    mockUserRepo.EXPECT().GetUserByEmail(context.Background(), user.Email).Return(nil, errors.New("user not found")).Times(1)
+    // mockUserRepo.EXPECT().UserExists(context.Background(), user.Email).Return(nil, errors.New("user not found")).Times(1)
 
     // CreateUserのmockを設定
     mockUserRepo.EXPECT().CreateUser(context.Background(), user).Return(nil).Times(1)
+    mockUserRepo.EXPECT().UserExists(context.Background(), user.Email).Return(false, nil).Times(1)
 
     usecase := usecase.NewUserUsecase(mockUserRepo)
 

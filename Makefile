@@ -1,5 +1,5 @@
 build:
-	docker build --no-cache -t go-tesma-api .
+	docker-compose build --no-cache
 up:
 	docker-compose up
 down:
@@ -22,4 +22,12 @@ build_app:
 
 test:
 	go test -v ./...
+
+# see:
+#     docker exec  -it go-tesma-api-app-1 cat
+
+# db_login:
+#   docker exec -it go-tesma-api-db-1 bin/bash
+# mysql -u user -p
+# USE dbname;
 

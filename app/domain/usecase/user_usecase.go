@@ -1,3 +1,4 @@
+// ファイル名: app/domain/usecaseuser_usecase.go
 package usecase
 
 import (
@@ -33,14 +34,11 @@ func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) error {
     }
 
     // Check if the user already exists
-    _, err = u.userRepo.GetUserByEmail(ctx, user.Email)
+    exists, err := u.userRepo.UserExists(ctx, user.Email)
     if err != nil {
-        // もしエラーが「ユーザーが見つからない」というエラーではない場合、エラーを返す
-        if err.Error() != "user not found" {
-            return err
-        }
-    } else {
-        // ユーザーが見つかった場合、エラーを返す
+        return err
+    }
+    if exists {
         return errors.New("user already exists")
     }
 
@@ -52,6 +50,7 @@ func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) error {
 
     return nil
 }
+
 
 
 func (u *userUsecase) UserExists(ctx context.Context, email string) (bool, error) {
