@@ -177,3 +177,24 @@ func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entit
 	}
 	return &user, nil
 }
+
+func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
+    user, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
+    if err != nil {
+        return nil, err
+    }
+
+    // Firebase Authenticationでのログイン試行
+    _, err = r.FirebaseAuth.VerifyPassword(ctx, user.UID, password)
+    if err != nil {
+        return nil, err
+    }
+
+    // DBからユーザーの情報を取得
+    localUser, err := r.GetUserByEmail(ctx, email)
+    if err != nil {
+        return nil, err
+    }
+
+    return localUser, nil
+}

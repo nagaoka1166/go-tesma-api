@@ -15,6 +15,7 @@ type UserUsecase interface {
     CreateUser(ctx context.Context, user *entity.User) error
     UserExists(ctx context.Context, email string) (bool, error)
     RefreshUserToken(ctx context.Context, refreshToken string) (string, error)
+    Login(ctx context.Context, email, password string) (*entity.User, error)
 }
 
 type userUsecase struct {
@@ -67,4 +68,12 @@ func (u *userUsecase) UserExists(ctx context.Context, email string) (bool, error
         log.Printf("error in userRepo.UserExists: %v", err)
     }
     return exists, err
+}
+
+func (u *userUsecase) Login(ctx context.Context, email, password string) (*entity.User, error) {
+    user, err := u.userRepo.Login(ctx, email, password)
+    if err != nil {
+        return errors.New("invalid login")
+    }
+    return user, nil
 }
