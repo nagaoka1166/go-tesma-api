@@ -73,14 +73,6 @@ func NewUserRepo(db *gorm.DB) repository.UserRepository {
 }
 
 
-
-
-
-func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
-	// TODO: 実際のログインロジックを書く
-	return nil, nil
-}
-
 func (r *UserRepoImpl) UpdateUser(ctx context.Context, user *entity.User) error {
 	// TODO: 実際のユーザー更新ロジックを書く
 	return nil

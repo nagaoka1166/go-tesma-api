@@ -21,6 +21,7 @@ func NewRouter(u usecase.UserUsecase) *gin.Engine {
 			"message": "Hello, World!",
 		})
 	})
+	v1.POST("/signin", userHandler.SignIn)
 	}
 
 	return r
