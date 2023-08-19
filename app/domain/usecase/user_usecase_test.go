@@ -1,40 +1,75 @@
+// app/domain/usecase/user_usecase_test.go
 package usecase_test
 
 import (
-    "context"
+	"context"
     "testing"
     "errors"
-    "github.com/golang/mock/gomock"
-    
-    "github.com/nagaoka166/go-tesma-api/app/domain/entity"
-    "github.com/nagaoka166/go-tesma-api/app/domain/usecase" 
-    mock_repository "github.com/nagaoka166/go-tesma-api/app/domain/repository/mock"
+    "strings"
+
+    "firebase.google.com/go/v4/auth"
+	"github.com/golang/mock/gomock"
+	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
+	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
+	mock_repository "github.com/nagaoka166/go-tesma-api/app/domain/repository/mock"
 )
 
-func TestCreateUser(t *testing.T) {
-    ctrl := gomock.NewController(t)
+func FuzzCreateUser(f *testing.F) {
+    ctrl := gomock.NewController(f)
     defer ctrl.Finish()
 
     mockUserRepo := mock_repository.NewMockUserRepository(ctrl)
+    ctx := context.Background()
+    userUsecase := usecase.NewUserUsecase(mockUserRepo)
 
-    user := &entity.User{
-        Email:    "111111@ed.ritsumei.ac.jp",
-        Password: "password1234",
-    }
+    // f.Add() の使用は問題がない場合にのみコメントアウトを解除
+    // f.Add("111111@ed.ritsumei.ac.jp", "pass12345")
 
-    // GetUserByEmailのmockを設定。ユーザーが存在しないと仮定して、エラーを返す。
-    // mockUserRepo.EXPECT().UserExists(context.Background(), user.Email).Return(nil, errors.New("user not found")).Times(1)
+    f.Fuzz(func(t *testing.T, email, password string) {
+        user := &entity.User{
+            Email:    email,
+            Password: password,
+        }
 
-    // CreateUserのmockを設定
-    mockUserRepo.EXPECT().CreateUser(context.Background(), user).Return(nil).Times(1)
-    mockUserRepo.EXPECT().UserExists(context.Background(), user.Email).Return(false, nil).Times(1)
+        mockUserRepo.EXPECT().CreateUser(ctx, user).Return(nil).AnyTimes()
+        mockUserRepo.EXPECT().UserExists(ctx, user.Email).Return(false, nil).AnyTimes()
 
-    usecase := usecase.NewUserUsecase(mockUserRepo)
-
-    err := usecase.CreateUser(context.Background(), user)
-    if err != nil {
-        t.Fatalf("failed to create user: %v", err)
-    }
+        if err := userUsecase.CreateUser(ctx, user); err != nil {
+            t.Fatalf("failed to create user: %v", err)
+        }
+    })
 }
 
 
+func FuzzVerifyIDToken(f *testing.F) {
+	ctrl := gomock.NewController(f)
+	defer ctrl.Finish()
+
+	
+	mockUserRepo := mock_repository.NewMockUserRepository(ctrl)
+	ctx := context.Background()
+
+	dummyToken := &auth.Token{
+		UID: "dummyUID",
+	}
+
+	f.Fuzz(func(t *testing.T, testIDToken string) {
+		if contains(testIDToken, "valid") {
+			mockUserRepo.EXPECT().VerifyIDToken(ctx, testIDToken).Return(dummyToken, nil).AnyTimes()
+		} else {
+			mockUserRepo.EXPECT().VerifyIDToken(ctx, testIDToken).Return(nil, errors.New("invalid token")).AnyTimes()
+		}
+
+		token, err := mockUserRepo.VerifyIDToken(ctx, testIDToken) 
+
+		if contains(testIDToken, "valid") && (err != nil || token.UID != dummyToken.UID) {
+			t.Fatalf("expected UID %v with no error, got UID %v with error %v", dummyToken.UID, token.UID, err)
+		} else if !contains(testIDToken, "valid") && err == nil {
+			t.Fatalf("expected an error for invalid token but got UID %v", token.UID)
+		}
+	})
+}
+
+func contains(s, substr string) bool {
+	return strings.Contains(s, substr)
+}

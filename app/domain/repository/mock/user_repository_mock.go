@@ -1,10 +1,13 @@
-
+// app/domain/repository/mock/user_repository_mock.go
 package mock_repository
 
 import (
 	entity "github.com/nagaoka166/go-tesma-api/app/domain/entity"
 	context "context"
 	reflect "reflect"
+	"firebase.google.com/go/auth"
+
+	
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -84,7 +87,6 @@ func (mr *MockUserRepositoryMockRecorder) RefreshToken(ctx, refreshToken interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockUserRepository)(nil).RefreshToken), ctx, refreshToken)
 }
 
-// UpdateUser mocks base method.
 func (m *MockUserRepository) UpdateUser(ctx context.Context, user *entity.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, user)
@@ -92,7 +94,6 @@ func (m *MockUserRepository) UpdateUser(ctx context.Context, user *entity.User) 
 	return ret0
 }
 
-// UpdateUser indicates an expected call of UpdateUser.
 func (mr *MockUserRepositoryMockRecorder) UpdateUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserRepository)(nil).UpdateUser), ctx, user)
@@ -109,4 +110,17 @@ func (m *MockUserRepository) UserExists(ctx context.Context, email string) (bool
 func (mr *MockUserRepositoryMockRecorder) UserExists(ctx, email interface{}) *gomock.Call {
     mr.mock.ctrl.T.Helper()
     return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserExists", reflect.TypeOf((*MockUserRepository)(nil).UserExists), ctx, email)
+}
+
+func (m *MockUserRepository) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyIDToken", ctx, idToken)
+	ret0, _ := ret[0].(*auth.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockUserRepositoryMockRecorder) VerifyIDToken(ctx, idToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyIDToken", reflect.TypeOf((*MockUserRepository)(nil).VerifyIDToken), ctx, idToken)
 }
