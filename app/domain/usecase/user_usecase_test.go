@@ -54,7 +54,6 @@ func FuzzVerifyIDToken(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, testIDToken string) {
-		rror.
 		if contains(testIDToken, "valid") {
 			mockUserRepo.EXPECT().VerifyIDToken(ctx, testIDToken).Return(dummyToken, nil).AnyTimes()
 		} else {

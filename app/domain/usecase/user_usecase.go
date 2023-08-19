@@ -14,6 +14,7 @@ import (
 type UserUsecase interface {
     CreateUser(ctx context.Context, user *entity.User) error
     UserExists(ctx context.Context, email string) (bool, error)
+    RefreshUserToken(ctx context.Context, refreshToken string) (string, error)
 }
 
 type userUsecase struct {
@@ -51,6 +52,13 @@ func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) error {
     return nil
 }
 
+func (u *userUsecase) RefreshUserToken(ctx context.Context, refreshToken string) (string, error) {
+    newToken, err := u.userRepo.RefreshToken(ctx, refreshToken)
+    if err != nil {
+        return "", err
+    }
+    return newToken, nil
+}
 
 
 func (u *userUsecase) UserExists(ctx context.Context, email string) (bool, error) {
