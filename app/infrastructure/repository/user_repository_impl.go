@@ -1,4 +1,4 @@
-// Path: app/infrastructure/repository/user_repository_impl.go
+// Pth: app/infrastructure/repository/user_repository_impl.go
 package repository
 
 import (
@@ -6,27 +6,24 @@ import (
 	"log"
 	"fmt"
 	"os"
-
+	// "golang.org/x/crypto/bcrypt"
+	
+	
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
 	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
 	"github.com/nagaoka166/go-tesma-api/app/domain/repository"
 	"google.golang.org/api/option"
+	"gorm.io/gorm"
 )
 
 type UserRepoImpl struct {
+	DB           *gorm.DB
 	FirebaseAuth *auth.Client
 }
 
-func loadLocalCredentials() string {
-	data, err := ioutil.ReadFile("Credentials.json")
-	if err != nil {
-		log.Fatalf("Failed to load local credentials: %v", err)
-	}
-	return string(data)
-}
 
-func NewUserRepo() repository.UserRepository {
+func NewUserRepo(db *gorm.DB) repository.UserRepository {
 	if os.Getenv("IS_CI") != "" {
 		// CI環境
 		credentialsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON")
@@ -41,19 +38,37 @@ func NewUserRepo() repository.UserRepository {
 		if err != nil {
 			log.Fatalf("error getting Auth client: %v\n", err)
 		}
-		return &UserRepoImpl{FirebaseAuth: auth}
-	} else {
-		// ローカル環境
-		localCredentials := loadLocalCredentials()
-		app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(localCredentials)))
-		if err != nil {
-			log.Fatalf("error initializing app: %v\n", err)
+
+		if err := db.AutoMigrate(&entity.User{}); err != nil {
+			log.Fatalf("Failed to auto migrate User: %v", err)
 		}
+
+		return &UserRepoImpl{
+            DB:           db,
+            FirebaseAuth: auth,
+        }
+	} else {
+
+		opt := option.WithCredentialsFile("./Credentials.json")
+		app, err := firebase.NewApp(context.Background(), nil, opt)
+		if err != nil {
+			log.Fatalf("error initializing app: %v", err)
+		}
+		
 		auth, err := app.Auth(context.Background())
 		if err != nil {
-			log.Fatalf("error getting Auth client: %v\n", err)
+			log.Fatalf("error getting Auth client: %v", err)
 		}
-		return &UserRepoImpl{FirebaseAuth: auth}
+
+		if err := db.AutoMigrate(&entity.User{}); err != nil {
+			log.Fatalf("Failed to auto migrate User: %v", err)
+		}
+		
+		return &UserRepoImpl{
+		DB:           db,
+		FirebaseAuth: auth,
+	}
+	
 	}
 }
 
@@ -83,7 +98,7 @@ func (r *UserRepoImpl) RefreshToken(ctx context.Context, refreshToken string) (s
 func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, error) {
 	_, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
 	if err != nil {
-		log.Printf("Error from Firebase Auth: %v", err)  // This is new
+		log.Printf("Error from Firebase Auth: %v", err)
 		if auth.IsUserNotFound(err) {
 			return false, nil
 		}
@@ -93,40 +108,59 @@ func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, erro
 }
 
 
-
 func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error {
-	exists, err := r.UserExists(ctx, user.Email)
-	if err != nil {
-		return err
-	}
+    // Check if the user already exists
+    exists, err := r.UserExists(ctx, user.Email)
+    if err != nil {
+        return err
+    }
+    if exists {
+        return fmt.Errorf("User already exists")
+    }
 
-	if exists {
-		return fmt.Errorf("User already exists")
-	}
+	// hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    // if err != nil {
+    //     log.Printf("Failed to hash password: %v", err)
+    //     return err
+    // }
+    // user.Password = string(hashedPassword)
 
-	params := (&auth.UserToCreate{}).Email(user.Email).Password(user.Password)
+	if err := r.DB.Create(&entity.User{
+		Email:    user.Email,
+		Password: user.Password,
+	}).Error; err != nil {
+        log.Printf("Failed to create user in MySQL: %v", err)
+        return err
+    }
+    log.Println("User successfully created in MySQL")
+
+    // Firebase registration
+    params := (&auth.UserToCreate{}).Email(user.Email).Password(user.Password)
 	_, err = r.FirebaseAuth.CreateUser(ctx, params)
-	return err
+	if err != nil {
+		log.Printf("Failed to create user in Firebase: %v", err)
+		
+		// Firebase失敗時にMySQLからロールバック
+		if delErr := r.DB.Delete(&entity.User{
+			Email: user.Email,
+		}).Error; delErr != nil {
+			log.Printf("Failed to delete user from MySQL after Firebase registration failure: %v", delErr)
+		}
+        
+        return err
+	}
+
+    log.Println("User successfully created in Firebase")
+    return nil
 }
 
-
-
-
 func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
-	userRecord, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
-	if err != nil {
-		if err.Error() == "firebase: user does not exist" {
-			// ユーザーが存在しない場合はエラーログを出力せずにnilを返す
+	var user entity.User
+	if result := r.DB.Where("email = ?", email).First(&user); result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
-		// それ以外のエラーが発生した場合は、そのままエラーを返す
-		return nil, err
+		return nil, result.Error
 	}
-	
-	// ユーザーレコードを entity.User に変換
-	user := &entity.User{
-		Email: userRecord.Email,
-	}
-
-	return user, nil
+	return &user, nil
 }
