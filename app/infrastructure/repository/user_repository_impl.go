@@ -126,41 +126,46 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error 
         return fmt.Errorf("User already exists")
     }
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    originalPassword := user.Password
+
+    // パスワードをハッシュ化
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
     if err != nil {
         log.Printf("Failed to hash password: %v", err)
         return err
     }
     user.Password = string(hashedPassword)
 
-	if err := r.DB.Create(&entity.User{
-		Email:    user.Email,
-		Password: user.Password,
-	}).Error; err != nil {
+    if err := r.DB.Create(&entity.User{
+        Email:    user.Email,
+        Password: user.Password,
+    }).Error; err != nil {
         log.Printf("Failed to create user in MySQL: %v", err)
         return err
     }
     log.Println("User successfully created in MySQL")
 
     // Firebase registration
-    params := (&auth.UserToCreate{}).Email(user.Email).Password(user.Password)
-	_, err = r.FirebaseAuth.CreateUser(ctx, params)
-	if err != nil {
-		log.Printf("Failed to create user in Firebase: %v", err)
-		
-		// Firebase失敗時にMySQLからロールバック
-		if delErr := r.DB.Delete(&entity.User{
-			Email: user.Email,
-		}).Error; delErr != nil {
-			log.Printf("Failed to delete user from MySQL after Firebase registration failure: %v", delErr)
-		}
-        
+    params := (&auth.UserToCreate{}).Email(user.Email).Password(originalPassword) // オリジナルのパスワードを使用
+    _, err = r.FirebaseAuth.CreateUser(ctx, params)
+    if err != nil {
+        log.Printf("Failed to create user in Firebase: %v", err)
+
+        // Firebase失敗時にMySQLからロールバック
+        if delErr := r.DB.Delete(&entity.User{
+            Email: user.Email,
+        }).Error; delErr != nil {
+            log.Printf("Failed to delete user from MySQL after Firebase registration failure: %v", delErr)
+        }
+
         return err
-	}
+    }
 
     log.Println("User successfully created in Firebase")
     return nil
 }
+
+
 
 func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	var user entity.User
