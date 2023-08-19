@@ -6,6 +6,7 @@ import (
 	"log"
 	"fmt"
 	"os"
+	// "golang.org/x/crypto/bcrypt"
 	
 	
 	firebase "firebase.google.com/go"
@@ -116,6 +117,13 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error 
     if exists {
         return fmt.Errorf("User already exists")
     }
+
+	// hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    // if err != nil {
+    //     log.Printf("Failed to hash password: %v", err)
+    //     return err
+    // }
+    // user.Password = string(hashedPassword)
 
 	if err := r.DB.Create(&entity.User{
 		Email:    user.Email,
