@@ -6,7 +6,7 @@ import (
 	"log"
 	"fmt"
 	"os"
-	// "golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/bcrypt"
 	
 	
 	firebase "firebase.google.com/go"
@@ -86,10 +86,18 @@ func (r *UserRepoImpl) UpdateUser(ctx context.Context, user *entity.User) error 
 	return nil
 }
 
+
 func (r *UserRepoImpl) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
-	// TODO: 実際のトークン更新ロジックを書く
-	return "", nil
+	client := r.FirebaseAuth
+	
+	_, err := client.VerifyIDTokenAndCheckRevoked(ctx, refreshToken)
+	if err != nil {
+		return "", fmt.Errorf("failed to verify and refresh ID token: %v", err)
+	}
+
+	return refreshToken, nil
 }
+
 
 
 
@@ -118,12 +126,12 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error 
         return fmt.Errorf("User already exists")
     }
 
-	// hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-    // if err != nil {
-    //     log.Printf("Failed to hash password: %v", err)
-    //     return err
-    // }
-    // user.Password = string(hashedPassword)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        log.Printf("Failed to hash password: %v", err)
+        return err
+    }
+    user.Password = string(hashedPassword)
 
 	if err := r.DB.Create(&entity.User{
 		Email:    user.Email,
