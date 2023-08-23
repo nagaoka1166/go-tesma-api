@@ -73,6 +73,14 @@ func NewUserRepo(db *gorm.DB) repository.UserRepository {
 }
 
 
+
+
+
+func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
+	// TODO: 実際のログインロジックを書く
+	return nil, nil
+}
+
 func (r *UserRepoImpl) UpdateUser(ctx context.Context, user *entity.User) error {
 	// TODO: 実際のユーザー更新ロジックを書く
 	return nil
@@ -94,7 +102,6 @@ func (r *UserRepoImpl) RefreshToken(ctx context.Context, refreshToken string) (s
 
 
 
-
 func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, error) {
 	_, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
 	if err != nil {
@@ -108,14 +115,14 @@ func (r *UserRepoImpl) UserExists(ctx context.Context, email string) (bool, erro
 }
 
 
-func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error {
+func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) (string, error) {
     // Check if the user already exists
     exists, err := r.UserExists(ctx, user.Email)
     if err != nil {
-        return err
+        return "", err
     }
     if exists {
-        return fmt.Errorf("User already exists")
+        return "", fmt.Errorf("User already exists")
     }
 
     originalPassword := user.Password
@@ -124,7 +131,7 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error 
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
     if err != nil {
         log.Printf("Failed to hash password: %v", err)
-        return err
+        return "", fmt.Errorf("User already exists")
     }
     user.Password = string(hashedPassword)
 
@@ -133,13 +140,13 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error 
         Password: user.Password,
     }).Error; err != nil {
         log.Printf("Failed to create user in MySQL: %v", err)
-        return err
+        return "", err
     }
     log.Println("User successfully created in MySQL")
 
     // Firebase registration
     params := (&auth.UserToCreate{}).Email(user.Email).Password(originalPassword) // オリジナルのパスワードを使用
-    _, err = r.FirebaseAuth.CreateUser(ctx, params)
+    firebaseUser, err := r.FirebaseAuth.CreateUser(ctx, params)
     if err != nil {
         log.Printf("Failed to create user in Firebase: %v", err)
 
@@ -150,11 +157,19 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) error 
             log.Printf("Failed to delete user from MySQL after Firebase registration failure: %v", delErr)
         }
 
-        return err
+        return "",err
     }
 
+	idToken, err := r.FirebaseAuth.CustomToken(ctx, firebaseUser.UID)
+	    if err != nil {
+        log.Printf("Failed to create custom token for user: %v", err)
+        return "", err
+    }
+
+	
+
     log.Println("User successfully created in Firebase")
-    return nil
+    return idToken, nil
 }
 
 
@@ -188,5 +203,5 @@ func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*enti
         return nil, err
     }
 
-    return localUser, nil
+    return localUser, string, nil
 }

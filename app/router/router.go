@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
-	"github.com/nagaoka166/go-tesma-api/app/interfaces/handler"
+	"github.com/nagaoka166/go-tesma-api/app/interfaces/handler/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +21,7 @@ func NewRouter(u usecase.UserUsecase) *gin.Engine {
 			"message": "Hello, World!",
 		})
 	})
-	v1.POST("/signin", userHandler.SignIn)
+	v1.POST("/login", userHandler.login)
 	}
 
 	return r

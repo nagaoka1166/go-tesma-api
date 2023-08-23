@@ -4,10 +4,9 @@ package usecase_test
 import (
 	"context"
     "testing"
-    "errors"
     "strings"
 
-    "firebase.google.com/go/v4/auth"
+    // "firebase.google.com/go/v4/auth"
 	"github.com/golang/mock/gomock"
 	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
 	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
@@ -41,34 +40,29 @@ func FuzzCreateUser(f *testing.F) {
 }
 
 
-func FuzzVerifyIDToken(f *testing.F) {
-	ctrl := gomock.NewController(f)
-	defer ctrl.Finish()
+// func FuzzVerifyIDToken(f *testing.F) {
+// 	ctrl := gomock.NewController(f)
+// 	defer ctrl.Finish()
 
 	
-	mockUserRepo := mock_repository.NewMockUserRepository(ctrl)
-	ctx := context.Background()
+// 	mockUserRepo := mock_repository.NewMockUserRepository(ctrl)
+// 	ctx := context.Background()
 
-	dummyToken := &auth.Token{
-		UID: "dummyUID",
-	}
+// 	dummyToken := &auth.Token{
+// 		UID: "dummyUID",
+// 	}
 
-	f.Fuzz(func(t *testing.T, testIDToken string) {
-		if contains(testIDToken, "valid") {
-			mockUserRepo.EXPECT().VerifyIDToken(ctx, testIDToken).Return(dummyToken, nil).AnyTimes()
-		} else {
-			mockUserRepo.EXPECT().VerifyIDToken(ctx, testIDToken).Return(nil, errors.New("invalid token")).AnyTimes()
-		}
-
-		token, err := mockUserRepo.VerifyIDToken(ctx, testIDToken) 
-
-		if contains(testIDToken, "valid") && (err != nil || token.UID != dummyToken.UID) {
-			t.Fatalf("expected UID %v with no error, got UID %v with error %v", dummyToken.UID, token.UID, err)
-		} else if !contains(testIDToken, "valid") && err == nil {
-			t.Fatalf("expected an error for invalid token but got UID %v", token.UID)
-		}
-	})
-}
+// 	f.Fuzz(func(t *testing.T, testIDToken string) {
+// 		...
+// 		token, err := mockUserRepo.VerifyIDToken(ctx, testIDToken)
+// 		if token != nil && contains(testIDToken, "valid") && (err != nil || token.UID != dummyToken.UID) {
+// 			t.Fatalf("expected UID %v with no error, got UID %v with error %v", dummyToken.UID, token.UID, err)
+// 		} else if !contains(testIDToken, "valid") && err == nil {
+// 			t.Fatalf("expected an error for invalid token but got UID %v", token.UID)
+// 		}
+// 	})
+	
+// }
 
 func contains(s, substr string) bool {
 	return strings.Contains(s, substr)

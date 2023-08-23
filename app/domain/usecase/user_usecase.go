@@ -12,10 +12,11 @@ import (
 )
 
 type UserUsecase interface {
-    CreateUser(ctx context.Context, user *entity.User) error
+    CreateUser(ctx context.Context, user *entity.User) (string, error)
     UserExists(ctx context.Context, email string) (bool, error)
     RefreshUserToken(ctx context.Context, refreshToken string) (string, error)
-    Login(ctx context.Context, email, password string) (*entity.User, error)
+    Login(ctx context.Context, email, password string) (*entity.User, string, error)
+    
 }
 
 type userUsecase struct {
@@ -28,29 +29,25 @@ func NewUserUsecase(userRepo repository.UserRepository) UserUsecase {
     }
 }
 
-func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) error {
-    // Validate the user details
+func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) (string, error) {
     err := user.Validate()
     if err != nil {
-        return err
+        return "", err
     }
-
-    // Check if the user already exists
     exists, err := u.userRepo.UserExists(ctx, user.Email)
     if err != nil {
-        return err
+        return "",err
     }
     if exists {
-        return errors.New("user already exists")
+        return "", errors.New("user already exists")
     }
 
-    // Create the user
-    err = u.userRepo.CreateUser(ctx, user)
+    idToken, err := u.userRepo.CreateUser(ctx, user)
     if err != nil {
-        return err
+        return "", err
     }
 
-    return nil
+    return token, nil
 }
 
 func (u *userUsecase) RefreshUserToken(ctx context.Context, refreshToken string) (string, error) {
@@ -70,10 +67,10 @@ func (u *userUsecase) UserExists(ctx context.Context, email string) (bool, error
     return exists, err
 }
 
-func (u *userUsecase) Login(ctx context.Context, email, password string) (*entity.User, error) {
-    user, err := u.userRepo.Login(ctx, email, password)
+func (u *userUsecase) Login(ctx context.Context, email, password string) (*entity.User, string, error) {
+    idToken, err := u.userRepo.Login(ctx, email, password)
     if err != nil {
-        return errors.New("invalid login")
+        return nil, "", errors.New("invalid login")
     }
-    return user, nil
+    return user, idToken, nil
 }
