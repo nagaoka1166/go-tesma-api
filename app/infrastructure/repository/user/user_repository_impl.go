@@ -11,14 +11,14 @@ import (
 	
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
-	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
-	"github.com/nagaoka166/go-tesma-api/app/domain/repository"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/entity"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/repository"
 	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
 type UserRepoImpl struct {
-	DB           *gorm.DB
+	DB *gorm.DB
 	FirebaseAuth *auth.Client
 }
 
@@ -44,12 +44,11 @@ func NewUserRepo(db *gorm.DB) repository.UserRepository {
 		}
 
 		return &UserRepoImpl{
-            DB:           db,
+			DB:  db,
             FirebaseAuth: auth,
         }
 	} else {
-
-		opt := option.WithCredentialsFile("./Credentials.json")
+		opt := option.WithCredentialsFile("Credentials.json")
 		app, err := firebase.NewApp(context.Background(), nil, opt)
 		if err != nil {
 			log.Fatalf("error initializing app: %v", err)
@@ -65,21 +64,13 @@ func NewUserRepo(db *gorm.DB) repository.UserRepository {
 		}
 		
 		return &UserRepoImpl{
-		DB:           db,
+		DB:    db,
 		FirebaseAuth: auth,
 	}
 	
 	}
 }
 
-
-
-
-
-func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
-	// TODO: 実際のログインロジックを書く
-	return nil, nil
-}
 
 func (r *UserRepoImpl) UpdateUser(ctx context.Context, user *entity.User) error {
 	// TODO: 実際のユーザー更新ロジックを書く
@@ -97,6 +88,18 @@ func (r *UserRepoImpl) RefreshToken(ctx context.Context, refreshToken string) (s
 
 	return refreshToken, nil
 }
+
+func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	var user entity.User
+	if err := r.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
 
 
 
@@ -174,34 +177,32 @@ func (r *UserRepoImpl) CreateUser(ctx context.Context, user *entity.User) (strin
 
 
 
-func (r *UserRepoImpl) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
-	var user entity.User
-	if result := r.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
-		return nil, result.Error
-	}
-	return &user, nil
-}
-
-func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, error) {
-    user, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
+func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*entity.User, string, error) {
+    // Firebase Authenticationのユーザー情報取得
+    fbUser, err := r.FirebaseAuth.GetUserByEmail(ctx, email)
     if err != nil {
-        return nil, err
+        return nil, "", err
     }
 
-    // Firebase Authenticationでのログイン試行
-    _, err = r.FirebaseAuth.VerifyPassword(ctx, user.UID, password)
-    if err != nil {
-        return nil, err
-    }
+    // ここでpasswordをVerifyするロジックが必要ですが、firebase/authパッケージではサポートされていないので
+    // 他の方法を考える必要があります。ここでは一時的にスキップします。
 
     // DBからユーザーの情報を取得
     localUser, err := r.GetUserByEmail(ctx, email)
     if err != nil {
-        return nil, err
+        return nil, "", err
     }
 
-    return localUser, string, nil
+	if err := bcrypt.CompareHashAndPassword([]byte(localUser.Password), []byte(password)); err != nil {
+        return nil, "", fmt.Errorf("invalid password")
+    }
+
+
+    // FirebaseのIDトークンを取得（これはサンプルなので適切な方法を検討する必要があります）
+    idToken, tokenErr := r.FirebaseAuth.CustomToken(ctx, fbUser.UID)
+    if tokenErr != nil {
+        return nil, "", tokenErr
+    }
+
+    return localUser, idToken, nil
 }

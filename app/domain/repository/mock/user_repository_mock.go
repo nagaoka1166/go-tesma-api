@@ -5,11 +5,12 @@
 package mock_repository
 
 import (
+	"github.com/gin-gonic/gin"
+    "github.com/golang/mock/gomock"
+    "testing"
+    "github.com/nagaoka1166/go-tesma-api/app/domain/entity"
 	context "context"
 	reflect "reflect"
-
-	gomock "github.com/golang/mock/gomock"
-	entity "github.com/nagaoka166/go-tesma-api/app/domain/entity"
 )
 
 // MockUserRepository is a mock of UserRepository interface.
@@ -36,11 +37,12 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockUserRepository) CreateUser(ctx context.Context, user *entity.User) error {
+func (m *MockUserRepository) CreateUser(ctx context.Context, user *entity.User) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, user)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateUser indicates an expected call of CreateUser.
@@ -65,12 +67,13 @@ func (mr *MockUserRepositoryMockRecorder) GetUserByEmail(ctx, email interface{})
 }
 
 // Login mocks base method.
-func (m *MockUserRepository) Login(ctx context.Context, email, password string) (*entity.User, error) {
+func (m *MockUserRepository) Login(ctx context.Context, email, password string) (*entity.User, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, email, password)
 	ret0, _ := ret[0].(*entity.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // Login indicates an expected call of Login.
@@ -123,17 +126,24 @@ func (mr *MockUserRepositoryMockRecorder) UserExists(ctx, email interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserExists", reflect.TypeOf((*MockUserRepository)(nil).UserExists), ctx, email)
 }
 
-// VerifyIDToken mocks base method.
-func (m *MockUserRepository) VerifyIDToken(ctx context.Context, idToken string) (*entity.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyIDToken", ctx, idToken)
-	ret0, _ := ret[0].(*entity.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+func MockLogin(c *gin.Context, t *testing.T) {
+    r := c.Request
+    w := c.Writer
+    _ = r
+	_ = w
+    // コントローラの生成
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish() // テスト終了時に呼び出す
+
+    // モックの生成
+    mockRepo := NewMockUserRepository(ctrl)
+
+    // メソッドの期待値を設定
+    mockEmail := "test@example.com"
+    mockPassword := "test1234"
+    mockUser := &entity.User{Email: mockEmail, Password: mockPassword}
+    mockToken := "sample_token"
+
+    mockRepo.EXPECT().Login(gomock.Any(), mockEmail, mockPassword).Return(mockUser, mockToken, nil)
 }
 
-// VerifyIDToken indicates an expected call of VerifyIDToken.
-func (mr *MockUserRepositoryMockRecorder) VerifyIDToken(ctx, idToken interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyIDToken", reflect.TypeOf((*MockUserRepository)(nil).VerifyIDToken), ctx, idToken)
-}

@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
-	infrastructureDb "github.com/nagaoka166/go-tesma-api/app/infrastructure"
-	infrastructure "github.com/nagaoka166/go-tesma-api/app/infrastructure/repository/user"
-	"github.com/nagaoka166/go-tesma-api/app/router"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/usecase"
+	infrastructureDb "github.com/nagaoka1166/go-tesma-api/app/infrastructure"
+	infrastructure "github.com/nagaoka1166/go-tesma-api/app/infrastructure/repository/user"
+	"github.com/nagaoka1166/go-tesma-api/app/router"
     // "github.com/gin-gonic/gin"
 
 )

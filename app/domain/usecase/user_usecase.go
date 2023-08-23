@@ -6,15 +6,15 @@ import (
     "context"
     "errors"
 
-    "github.com/nagaoka166/go-tesma-api/app/domain/entity"
-    "github.com/nagaoka166/go-tesma-api/app/domain/repository"
+    "github.com/nagaoka1166/go-tesma-api/app/domain/entity"
+    "github.com/nagaoka1166/go-tesma-api/app/domain/repository"
     // mock_repository "github.com/nagaoka166/go-tesma-api/app/domain/repository/mock"
 )
 
 type UserUsecase interface {
     CreateUser(ctx context.Context, user *entity.User) (string, error)
     UserExists(ctx context.Context, email string) (bool, error)
-    RefreshUserToken(ctx context.Context, refreshToken string) (string, error)
+    // RefreshUserToken(ctx context.Context, refreshToken string) (string, error)
     Login(ctx context.Context, email, password string) (*entity.User, string, error)
     
 }
@@ -47,7 +47,7 @@ func (u *userUsecase) CreateUser(ctx context.Context, user *entity.User) (string
         return "", err
     }
 
-    return token, nil
+    return idToken, nil
 }
 
 func (u *userUsecase) RefreshUserToken(ctx context.Context, refreshToken string) (string, error) {
@@ -68,7 +68,7 @@ func (u *userUsecase) UserExists(ctx context.Context, email string) (bool, error
 }
 
 func (u *userUsecase) Login(ctx context.Context, email, password string) (*entity.User, string, error) {
-    idToken, err := u.userRepo.Login(ctx, email, password)
+    user, idToken, err := u.userRepo.Login(ctx, email, password)
     if err != nil {
         return nil, "", errors.New("invalid login")
     }

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/entity"
 	"context"
 )
 

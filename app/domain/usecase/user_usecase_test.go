@@ -8,9 +8,9 @@ import (
 
     // "firebase.google.com/go/v4/auth"
 	"github.com/golang/mock/gomock"
-	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
-	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
-	mock_repository "github.com/nagaoka166/go-tesma-api/app/domain/repository/mock"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/entity"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/usecase"
+	mock_repository "github.com/nagaoka1166/go-tesma-api/app/domain/repository/mock"
 )
 
 func FuzzCreateUser(f *testing.F) {
@@ -33,9 +33,12 @@ func FuzzCreateUser(f *testing.F) {
         mockUserRepo.EXPECT().CreateUser(ctx, user).Return(nil).AnyTimes()
         mockUserRepo.EXPECT().UserExists(ctx, user.Email).Return(false, nil).AnyTimes()
 
-        if err := userUsecase.CreateUser(ctx, user); err != nil {
+        idToken, err := userUsecase.CreateUser(ctx, user)
+        if err != nil {
             t.Fatalf("failed to create user: %v", err)
         }
+        _ = idToken 
+        
     })
 }
 

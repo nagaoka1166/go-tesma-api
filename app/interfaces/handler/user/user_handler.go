@@ -4,8 +4,8 @@ package handler
 import (
 	"net/http"
 	"context"
-	"github.com/nagaoka166/go-tesma-api/app/domain/usecase"
-	"github.com/nagaoka166/go-tesma-api/app/domain/entity"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/usecase"
+	"github.com/nagaoka1166/go-tesma-api/app/domain/entity"
     // "strings"
 
 	"github.com/gin-gonic/gin"
@@ -50,7 +50,6 @@ func (h *UserHandler) Login (c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-    err := h.UserUsecase.Login(context.Background(), &user)
     loggedInUser, idToken, err := h.UserUsecase.Login(context.Background(), user.Email, user.Password)
     if err != nil {
         switch err.Error() {
