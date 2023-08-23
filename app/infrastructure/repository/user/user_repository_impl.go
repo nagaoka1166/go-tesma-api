@@ -48,7 +48,8 @@ func NewUserRepo(db *gorm.DB) repository.UserRepository {
             FirebaseAuth: auth,
         }
 	} else {
-		opt := option.WithCredentialsFile("Credentials.json")
+		// opt := option.WithCredentialsFile("/Users/nagaokaryuunotasuku/go-tesma-api/Credentials.json") #テストの時絶対パスで読み込む
+		opt := option.WithCredentialsFile("./Credentials.json")
 		app, err := firebase.NewApp(context.Background(), nil, opt)
 		if err != nil {
 			log.Fatalf("error initializing app: %v", err)
