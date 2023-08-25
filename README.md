@@ -1,4 +1,7 @@
-# go-tesma-api
+#被験者募集アプリケーション
+## サービスの目的
+[サービスの目的やリプレイス前のアプリについて別リポジトリにて記載してあります](https://github.com/nagaoka1166/rubybook-service-examinee
+)
 
 ### データベース設計
 <img src="https://github.com/nagaoka1166/go-tesma-api/assets/69971830/005f04cc-1029-43fc-9fd0-021890569815" width="500">
