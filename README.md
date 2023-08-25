@@ -17,7 +17,7 @@
 
 ## Firebase Authentication の技術選定の背景
 
-ユーザーのUX向上や利用状況を把握するために以下の機能が利用したいためFirebase Authenticationを選定しました。
+モバイルアプリを想定している。ユーザーのUX向上や利用状況を把握できる以下の機能が欲しいモチベーションからFirebase Authenticationを選定しました。
 
 ### 1. **Firebase Console**
 - ユーザーの管理、確認、削除などの操作が容易に行えます。
