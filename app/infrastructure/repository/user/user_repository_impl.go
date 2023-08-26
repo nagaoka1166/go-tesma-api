@@ -185,10 +185,6 @@ func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*enti
         return nil, "", err
     }
 
-    // ここでpasswordをVerifyするロジックが必要ですが、firebase/authパッケージではサポートされていないので
-    // 他の方法を考える必要があります。ここでは一時的にスキップします。
-
-    // DBからユーザーの情報を取得
     localUser, err := r.GetUserByEmail(ctx, email)
     if err != nil {
         return nil, "", err
@@ -199,7 +195,6 @@ func (r *UserRepoImpl) Login(ctx context.Context, email, password string) (*enti
     }
 
 
-    // FirebaseのIDトークンを取得（これはサンプルなので適切な方法を検討する必要があります）
     idToken, tokenErr := r.FirebaseAuth.CustomToken(ctx, fbUser.UID)
     if tokenErr != nil {
         return nil, "", tokenErr

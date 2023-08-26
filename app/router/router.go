@@ -15,13 +15,14 @@ func NewRouter(u usecase.UserUsecase) *gin.Engine {
 	{
 	userHandler := handler.NewUserHandler(u)
 	v1.POST("/signup", userHandler.SignUp)
+	v1.POST("/login", userHandler.Login)
+
 
 	v1.GET("/hello", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Hello, World!",
 		})
 	})
-	v1.POST("/login", userHandler.Login)
 	}
 
 	return r

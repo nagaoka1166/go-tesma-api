@@ -13,3 +13,11 @@
 | ユースケース層 (app/domain/usecase)                          | プリケーションの具体的なビジネスロジックを担当。エンティティを操作を実装する。 |
 | インターフェース層 (app/interfaces)                                  |アプリケーションの入出力のためのインターフェース                         |
 | インフラストラクチャ (app/infrastructure)                      | アプリケーションのインフラストラクチャ関連のロジックを管理している。外部のフレームワークやツール、データベースなどとの接続。具体的な技術やフレームワークの実装が含まれている。
+
+
+## Dockerコマンド
+
+db_login:
+   `docker exec -it go-tesma-api-db-1 bin/bash`
+   `mysql -u user -p`
+   ` USE dbname;`
