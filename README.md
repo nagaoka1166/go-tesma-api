@@ -34,7 +34,10 @@
 ### 3. **Firebase Analytics**
 - ユーザーの行動をトラッキングして分析できる
 
-### 4. **JWT認証**
+### 4. **SDK**
+- ログイン後にサーバーに送信されたidトークンのuidからcurrent_userを簡単に取得できる
+
+### 5. **JWT認証**
 - 後ほど解説
 
 加えて、GoはFirebase Authenticationに公式にサポートされており、認証関連の実装が効率的に行えます。このようなメリットから、本アプリケーションでFirebase Authenticationを採用することとしました。
