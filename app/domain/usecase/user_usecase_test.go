@@ -6,7 +6,6 @@ import (
     "testing"
     "strings"
 
-    // "firebase.google.com/go/v4/auth"
 	"github.com/golang/mock/gomock"
 	"github.com/nagaoka1166/go-tesma-api/app/domain/entity"
 	"github.com/nagaoka1166/go-tesma-api/app/domain/usecase"
@@ -43,6 +42,7 @@ func FuzzCreateUser(f *testing.F) {
 }
 
 
+// MEMO: VerifyIDTokenメソッドはおそらく必要ないが一旦残しておく
 // func FuzzVerifyIDToken(f *testing.F) {
 // 	ctrl := gomock.NewController(f)
 // 	defer ctrl.Finish()

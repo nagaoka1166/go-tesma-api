@@ -93,3 +93,9 @@ Firebase Authenticationでは、以下の条件で更新トークンが無効と
 
 IDトークンの有効期間は短いため、期限切れ時に更新トークンを使用して新しいIDトークンを取得します。これにより、ユーザーは再ログインの必要がなくなります。
 
+## Dockerコマンド
+
+db_login:
+   `docker exec -it go-tesma-api-db-1 bin/bash`
+   `mysql -u user -p`
+   ` USE dbname;`
